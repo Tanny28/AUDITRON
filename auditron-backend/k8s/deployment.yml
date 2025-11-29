@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auditron-api
+  namespace: auditron
+  labels:
+    app: auditron-api
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: auditron-api
+  template:
+    metadata:
+      labels:
+        app: auditron-api
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: auditron-api
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      
+      containers:
+      - name: auditron-api
+        image: ghcr.io/your-org/auditron-api:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: auditron-secrets
+              key: database-url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: auditron-secrets
+              key: redis-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: auditron-secrets
+              key: jwt-secret
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auditron-secrets
+              key: openai-api-key
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auditron-secrets
+              key: stripe-secret-key
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: auditron-secrets
+              key: sentry-dsn
+        
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+        
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+      
+      terminationGracePeriodSeconds: 30
+      
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - auditron-api
+              topologyKey: kubernetes.io/hostname

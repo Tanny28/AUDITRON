@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --bg-dark: #0b0b0d;
+    --text-white: #ffffff;
+    --text-gray: #a1a1aa;
+    --accent-gold: #d4b861;
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.06);
+}
+
+@layer base {
+    * {
+        @apply border-glass-border;
+    }
+
+    body {
+        @apply text-text-white font-sans antialiased;
+        background: #0b0b0d;
+        background-image:
+            radial-gradient(ellipse at 20% 80%, rgba(212, 184, 97, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, rgba(212, 184, 97, 0.1) 0%, transparent 50%),
+            linear-gradient(135deg,
+                transparent 0%,
+                rgba(212, 184, 97, 0.03) 25%,
+                transparent 50%,
+                rgba(212, 184, 97, 0.05) 75%,
+                transparent 100%);
+        background-attachment: fixed;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60vh;
+        background:
+            radial-gradient(ellipse 150% 100% at 50% 100%,
+                rgba(212, 184, 97, 0.2) 0%,
+                rgba(212, 184, 97, 0.1) 30%,
+                transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    body::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image:
+            repeating-linear-gradient(45deg,
+                transparent,
+                transparent 100px,
+                rgba(212, 184, 97, 0.02) 100px,
+                rgba(212, 184, 97, 0.02) 200px);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    h1 {
+        @apply text-5xl md:text-6xl font-light leading-tight;
+    }
+
+    h2 {
+        @apply text-3xl md:text-4xl font-semibold;
+    }
+
+    h3 {
+        @apply text-2xl font-semibold;
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply bg-glass-bg backdrop-blur-md border border-glass-border rounded-2xl p-6 transition-all duration-300;
+    }
+
+    .glass-card:hover {
+        @apply transform -translate-y-1 shadow-2xl border-opacity-20;
+    }
+
+    .btn {
+        @apply inline-flex items-center justify-center px-6 py-3 rounded-full font-medium transition-all duration-300 cursor-pointer;
+    }
+
+    .btn-primary {
+        @apply bg-text-white text-bg-dark hover:bg-accent-gold hover:shadow-lg;
+    }
+
+    .btn-outline {
+        @apply border border-glass-border bg-glass-bg hover:bg-white hover:bg-opacity-10;
+    }
+
+    .btn-gold {
+        @apply bg-accent-gold text-bg-dark hover:bg-opacity-90 hover:shadow-xl;
+    }
+
+    .input {
+        @apply w-full px-4 py-3 bg-glass-bg border border-glass-border rounded-lg text-text-white placeholder-text-gray focus:outline-none focus:border-accent-gold transition-colors;
+    }
+
+    .hero-wave {
+        @apply absolute left-0 top-0 w-full h-full opacity-60 mix-blend-screen pointer-events-none;
+    }
+
+    .fade-up {
+        @apply opacity-0 translate-y-8 transition-all duration-700 ease-out;
+    }
+
+    .fade-up.visible {
+        @apply opacity-100 translate-y-0;
+    }
+}
+
+@layer utilities {
+    .text-gradient {
+        @apply bg-gradient-to-r from-text-white to-text-gray bg-clip-text text-transparent;
+    }
+
+    .gold-glow {
+        box-shadow: 0 0 20px rgba(212, 184, 97, 0.4);
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-gold);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #c4a851;
+}
+
+/* Loading spinner */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    border: 2px solid var(--glass-border);
+    border-top-color: var(--accent-gold);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 0.6s linear infinite;
+}

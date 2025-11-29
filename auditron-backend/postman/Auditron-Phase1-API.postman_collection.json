@@ -1,0 +1,997 @@
+{
+    "info": {
+        "name": "Auditron Phase 1 API",
+        "description": "Complete API collection for AUDITRON backend Phase 1 - AI-driven accounting automation platform",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "auditron-team"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "orgId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "userId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "invoiceId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "transactionId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "reconciliationId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "agentJobId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "reportId",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    },
+                    "response": [
+                        {
+                            "name": "Success",
+                            "originalRequest": {
+                                "method": "GET",
+                                "url": "{{base_url}}/health"
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2025-01-29T08:00:00.000Z\"\n}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const response = pm.response.json();",
+                                    "pm.collectionVariables.set('token', response.token);",
+                                    "pm.collectionVariables.set('userId', response.user.id);",
+                                    "pm.collectionVariables.set('orgId', response.user.organizationId);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"newuser@auditron.ai\",\n  \"password\": \"SecurePass123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"organizationName\": \"Acme Corp\",\n  \"organizationEmail\": \"acme@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const response = pm.response.json();",
+                                    "pm.collectionVariables.set('token', response.token);",
+                                    "pm.collectionVariables.set('userId', response.user.id);",
+                                    "pm.collectionVariables.set('orgId', response.user.organizationId);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"admin@auditron.ai\",\n  \"password\": \"admin123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Current User",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "me"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Organization",
+            "item": [
+                {
+                    "name": "Get Organization",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/org/{{orgId}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "org",
+                                "{{orgId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Organization",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Org Name\",\n  \"phone\": \"+91 9876543210\",\n  \"gstNumber\": \"29ABCDE1234F1Z5\",\n  \"panNumber\": \"ABCDE1234F\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/org/{{orgId}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "org",
+                                "{{orgId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Invoices",
+            "item": [
+                {
+                    "name": "Upload Invoice",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const response = pm.response.json();",
+                                    "pm.collectionVariables.set('invoiceId', response.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "/path/to/invoice.pdf"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/invoice/upload",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "invoice",
+                                "upload"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Invoices",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/invoice/list?page=1&limit=20",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "invoice",
+                                "list"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "COMPLETED",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Invoice",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/invoice/{{invoiceId}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "invoice",
+                                "{{invoiceId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Start OCR Processing",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/invoice/{{invoiceId}}/ocr",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "invoice",
+                                "{{invoiceId}}",
+                                "ocr"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Transactions",
+            "item": [
+                {
+                    "name": "Create Transaction",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const response = pm.response.json();",
+                                    "pm.collectionVariables.set('transactionId', response.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"transactionDate\": \"2025-01-29T08:00:00.000Z\",\n  \"description\": \"Office supplies purchase\",\n  \"amount\": 5000.00,\n  \"type\": \"DEBIT\",\n  \"category\": \"Office Expenses\",\n  \"subCategory\": \"Stationery\",\n  \"gstRate\": 18,\n  \"gstAmount\": 900.00,\n  \"bankReference\": \"TXN123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Transactions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions?page=1&limit=50",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "50"
+                                },
+                                {
+                                    "key": "category",
+                                    "value": "Office Expenses",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "isReconciled",
+                                    "value": "false",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transaction",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/{{transactionId}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "{{transactionId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Transaction",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"category\": \"Updated Category\",\n  \"notes\": \"Updated notes\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/{{transactionId}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "{{transactionId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Transaction",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/{{transactionId}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "{{transactionId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Reconciliation",
+            "item": [
+                {
+                    "name": "Start Reconciliation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const response = pm.response.json();",
+                                    "pm.collectionVariables.set('reconciliationId', response.reconciliationId);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Monthly Reconciliation - January 2025\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2025-01-31T23:59:59.000Z\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/reconcile/start",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reconcile",
+                                "start"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Reconciliation Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/reconcile/{{reconciliationId}}/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reconcile",
+                                "{{reconciliationId}}",
+                                "status"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Reconciliation Results",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/reconcile/{{reconciliationId}}/results",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reconcile",
+                                "{{reconciliationId}}",
+                                "results"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Reconciliations",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/reconcile/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reconcile",
+                                "list"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Reports",
+            "item": [
+                {
+                    "name": "Generate Report",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const response = pm.response.json();",
+                                    "pm.collectionVariables.set('reportId', response.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"type\": \"PROFIT_LOSS\",\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"endDate\": \"2025-01-31T23:59:59.000Z\",\n  \"name\": \"January 2025 P&L\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/generate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "generate"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get P&L Report",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/pnl?startDate=2025-01-01&endDate=2025-01-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "pnl"
+                            ],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2025-01-31"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Balance Sheet",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/balance-sheet?date=2025-01-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "balance-sheet"
+                            ],
+                            "query": [
+                                {
+                                    "key": "date",
+                                    "value": "2025-01-31"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get GST Report",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/gst?startDate=2025-01-01&endDate=2025-01-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "gst"
+                            ],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2025-01-31"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Reports",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "list"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Report by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/{{reportId}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "{{reportId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "AI Agents",
+            "item": [
+                {
+                    "name": "Run Agent Job",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const response = pm.response.json();",
+                                    "pm.collectionVariables.set('agentJobId', response.jobId);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"type\": \"CATEGORIZATION\",\n  \"input\": {\n    \"transactionId\": \"{{transactionId}}\",\n    \"description\": \"Office supplies purchase\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/agent/run",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agent",
+                                "run"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Agent Job Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/agent/status/{{agentJobId}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agent",
+                                "status",
+                                "{{agentJobId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Agent Jobs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/agent/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agent",
+                                "list"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

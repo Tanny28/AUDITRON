@@ -1,0 +1,19 @@
+# Cron jobs for automated backups
+
+# Database backup - Daily at 2:00 AM UTC
+0 2 * * * /opt/auditron/scripts/backup-database.sh >> /var/log/auditron/backup-db.log 2>&1
+
+# Database backup - Hourly incremental
+0 * * * * /opt/auditron/scripts/backup-database.sh --incremental >> /var/log/auditron/backup-db-hourly.log 2>&1
+
+# MinIO backup - Hourly sync to S3
+0 * * * * /opt/auditron/scripts/backup-minio.sh >> /var/log/auditron/backup-minio.log 2>&1
+
+# Backup verification - Weekly on Sunday at 3:00 AM
+0 3 * * 0 /opt/auditron/scripts/test-backup.sh >> /var/log/auditron/backup-test.log 2>&1
+
+# Clean old logs - Daily at 4:00 AM
+0 4 * * * find /var/log/auditron -name "*.log" -mtime +30 -delete
+
+# Queue cleanup - Daily at 1:00 AM
+0 1 * * * curl -X POST http://localhost:3000/api/admin/queue/clean >> /var/log/auditron/queue-clean.log 2>&1

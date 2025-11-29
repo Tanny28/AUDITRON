@@ -1,0 +1,342 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  CA          // Chartered Accountant
+  USER
+}
+
+enum InvoiceStatus {
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+}
+
+enum ReconciliationStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum AgentJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum AgentType {
+  OCR
+  CATEGORIZATION
+  RECONCILIATION
+  COMPLIANCE
+  REPORTING
+}
+
+enum ReportType {
+  PROFIT_LOSS
+  BALANCE_SHEET
+  GST
+  TAX
+  CASH_FLOW
+}
+
+enum SubscriptionTier {
+  FREE
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model Organization {
+  id                String              @id @default(cuid())
+  name              String
+  email             String              @unique
+  phone             String?
+  address           String?
+  gstNumber         String?
+  panNumber         String?
+  subscriptionTier  SubscriptionTier    @default(FREE)
+  subscriptionEndsAt DateTime?
+  stripeCustomerId  String?             @unique
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  users             User[]
+  invoices          Invoice[]
+  transactions      Transaction[]
+  ledgerEntries     LedgerEntry[]
+  reconciliations   Reconciliation[]
+  reports           Report[]
+  agentJobs         AgentJob[]
+  auditLogs         AuditLog[]
+  
+  @@index([email])
+  @@map("organizations")
+}
+
+model User {
+  id                String              @id @default(cuid())
+  email             String              @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  role              UserRole            @default(USER)
+  isActive          Boolean             @default(true)
+  emailVerified     Boolean             @default(false)
+  lastLoginAt       DateTime?
+  
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  invoices          Invoice[]
+  agentJobs         AgentJob[]
+  auditLogs         AuditLog[]
+  
+  @@index([email])
+  @@index([organizationId])
+  @@map("users")
+}
+
+model Invoice {
+  id                String              @id @default(cuid())
+  invoiceNumber     String
+  vendorName        String?
+  vendorGst         String?
+  invoiceDate       DateTime?
+  dueDate           DateTime?
+  totalAmount       Float?
+  taxAmount         Float?
+  gstAmount         Float?
+  status            InvoiceStatus       @default(UPLOADED)
+  fileUrl           String
+  fileName          String
+  fileSize          Int
+  mimeType          String
+  ocrData           Json?               // Extracted OCR data
+  
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  uploadedById      String
+  uploadedBy        User                @relation(fields: [uploadedById], references: [id])
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  transactions      Transaction[]
+  
+  @@index([organizationId])
+  @@index([status])
+  @@index([invoiceDate])
+  @@map("invoices")
+}
+
+model Transaction {
+  id                String              @id @default(cuid())
+  transactionDate   DateTime
+  description       String
+  amount            Float
+  type              TransactionType
+  category          String?
+  subCategory       String?
+  gstRate           Float?
+  gstAmount         Float?
+  isReconciled      Boolean             @default(false)
+  bankReference     String?
+  notes             String?
+  metadata          Json?               // Additional flexible data
+  
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  invoiceId         String?
+  invoice           Invoice?            @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  
+  ledgerEntryId     String?             @unique
+  ledgerEntry       LedgerEntry?        @relation(fields: [ledgerEntryId], references: [id], onDelete: SetNull)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  reconciliationMatches ReconciliationMatch[]
+  
+  @@index([organizationId])
+  @@index([transactionDate])
+  @@index([category])
+  @@index([isReconciled])
+  @@map("transactions")
+}
+
+model LedgerEntry {
+  id                String              @id @default(cuid())
+  entryDate         DateTime
+  accountCode       String
+  accountName       String
+  debit             Float               @default(0)
+  credit            Float               @default(0)
+  description       String
+  reference         String?
+  isReconciled      Boolean             @default(false)
+  
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  transaction       Transaction?
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  reconciliationMatches ReconciliationMatch[]
+  
+  @@index([organizationId])
+  @@index([entryDate])
+  @@index([accountCode])
+  @@map("ledger_entries")
+}
+
+model Reconciliation {
+  id                String              @id @default(cuid())
+  name              String
+  startDate         DateTime
+  endDate           DateTime
+  status            ReconciliationStatus @default(PENDING)
+  totalMatched      Int                 @default(0)
+  totalUnmatched    Int                 @default(0)
+  matchedAmount     Float               @default(0)
+  unmatchedAmount   Float               @default(0)
+  results           Json?               // Detailed reconciliation results
+  
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  completedAt       DateTime?
+  
+  matches           ReconciliationMatch[]
+  
+  @@index([organizationId])
+  @@index([status])
+  @@map("reconciliations")
+}
+
+model ReconciliationMatch {
+  id                String              @id @default(cuid())
+  matchScore        Float               // 0-1 confidence score
+  matchType         String              // EXACT, PARTIAL, SUGGESTED
+  
+  reconciliationId  String
+  reconciliation    Reconciliation      @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+  
+  transactionId     String?
+  transaction       Transaction?        @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  
+  ledgerEntryId     String?
+  ledgerEntry       LedgerEntry?        @relation(fields: [ledgerEntryId], references: [id], onDelete: SetNull)
+  
+  createdAt         DateTime            @default(now())
+  
+  @@index([reconciliationId])
+  @@map("reconciliation_matches")
+}
+
+model Report {
+  id                String              @id @default(cuid())
+  name              String
+  type              ReportType
+  startDate         DateTime
+  endDate           DateTime
+  data              Json                // Report data
+  fileUrl           String?             // PDF/Excel export URL
+  
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([organizationId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("reports")
+}
+
+model AgentJob {
+  id                String              @id @default(cuid())
+  type              AgentType
+  status            AgentJobStatus      @default(QUEUED)
+  input             Json                // Input parameters
+  output            Json?               // Agent output
+  error             String?
+  logs              Json[]              @default([])
+  progress          Int                 @default(0) // 0-100
+  
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  triggeredById     String?
+  triggeredBy       User?               @relation(fields: [triggeredById], references: [id], onDelete: SetNull)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  startedAt         DateTime?
+  completedAt       DateTime?
+  
+  @@index([organizationId])
+  @@index([status])
+  @@index([type])
+  @@map("agent_jobs")
+}
+
+model AuditLog {
+  id                String              @id @default(cuid())
+  action            String              // LOGIN, CREATE_INVOICE, DELETE_TRANSACTION, etc.
+  entityType        String?             // User, Invoice, Transaction, etc.
+  entityId          String?
+  changes           Json?               // Before/after data
+  ipAddress         String?
+  userAgent         String?
+  
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  userId            String?
+  user              User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  createdAt         DateTime            @default(now())
+  
+  @@index([organizationId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

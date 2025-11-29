@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auditron-config
+  namespace: auditron
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  CORS_ORIGIN: "https://app.auditron.ai"
+  RATE_LIMIT_MAX: "100"
+  RATE_LIMIT_TIMEWINDOW: "1 minute"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: auditron-secrets
+  namespace: auditron
+type: Opaque
+stringData:
+  database-url: "postgresql://postgres:CHANGE_ME@postgres:5432/auditron"
+  redis-url: "redis://redis:6379"
+  jwt-secret: "CHANGE_ME_TO_SECURE_RANDOM_STRING"
+  openai-api-key: "sk-CHANGE_ME"
+  stripe-secret-key: "sk_live_CHANGE_ME"
+  stripe-webhook-secret: "whsec_CHANGE_ME"
+  sentry-dsn: "https://CHANGE_ME@sentry.io/PROJECT_ID"
+  minio-access-key: "CHANGE_ME"
+  minio-secret-key: "CHANGE_ME"
