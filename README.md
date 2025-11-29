@@ -197,7 +197,7 @@ AUDITRON Development Team
 
 ## 📞 Support
 
-For support, email support@auditron.ai
+For support, email shindetanmay282@gmail.com
 
 ---
 
